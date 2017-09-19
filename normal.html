@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>optimize</title>
+    <style>
+        html,
+        body,
+        #mapishere {
+            height: 100%;
+            border: 0;
+            margin: 0;
+        }
+    </style>
+
+</head>
+
+<body class="menushow">
+
+    <div id="mapishere" class="mapishere"></div>
+    <script type="text/javascript" src="dojoConfig.js"></script>
+    <!-- <link rel="stylesheet" type="text/css" href="http://myapp.com:8080/4.2/esri/css/main.css"/> -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.4/esri/css/main.css">
+    <script src="https://js.arcgis.com/4.4/"></script>
+
+    <!-- <script type="text/javascript" src="http://myapp.com:8080/4.2/init.js"></script> -->
+    <!--<script src="app/kernel/objectWatch.js"></script>-->
+    <script>
+        var map;
+        var view;
+        var s;
+        var test;
+        var layer;
+
+        require([
+            "dojo/parser", 'dojo/_base/lang', "esri/Map", "esri/views/MapView", "esri/request",
+            "esri/geometry/Point",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/symbols/SimpleFillSymbol",
+            "esri/geometry/support/webMercatorUtils",
+            'esri/Graphic', 'widgets/SearchAround', 'widgets/OptimizeGraphicsLayer',
+            "esri/geometry/support/jsonUtils", 'esri/layers/GraphicsLayer',
+            "dojo/domReady!"
+        ], function (parser, lang, Map, MapView, esriRequest,
+            Point,
+            SimpleMarkerSymbol,
+            SimpleFillSymbol,
+            webMercatorUtils,
+            Graphic, SearchAround, OptimizeGraphicsLayer, geometryUtils, GraphicsLayer) {
+            parser.parse();
+
+            map = new Map({
+                basemap: "streets"
+            });
+            view = new MapView({
+                container: "mapishere", // Reference to the scene div created in step 5
+                map: map, // Reference to the map object created before the scene
+                zoom: 4, // Sets zoom level based on level of detail (LOD)
+                center: [15, 65]
+            });
+
+            layer = new GraphicsLayer();
+
+            view.map.add(layer);
+
+            view.then(lang.hitch(this, function () {
+                esriRequest('polygon.json', {
+                    responseType: "json"
+                }).then(function (res) {
+                    var geometry = geometryUtils.fromJSON(res.data);
+                    // geometry.spatialReference = view.spatialReference;
+                    geometry = webMercatorUtils.geographicToWebMercator(geometry);
+
+                    test = new Graphic({
+                        geometry: geometry,
+                        symbol: new SimpleFillSymbol()
+                    });
+
+                    view.goTo(test);
+
+                    layer.add(test);
+                });
+
+
+            }));
+
+        });
+    </script>
+</body>
+
+</html>
