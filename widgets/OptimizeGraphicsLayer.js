@@ -69,7 +69,7 @@ define([
           this.throttle(lang.hitch(this, function () {
               this.removeAll(true);
               this.addGraphics();
-          }), 0);
+          }), 300);
       },
 
       _unsetMap: function () {
